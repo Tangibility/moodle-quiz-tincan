@@ -122,8 +122,8 @@ class report_tincan {
 		$cm      = get_coursemodule_from_id('quiz', $event->cmid, $event->courseid);
 		$attempt = $DB->get_record('quiz_attempts', array('id' => $event->attemptid));
 
-		$registrationUID = self::findTincanUID($attempt->id);
 		$statementUID = self::tincanrpt_gen_uuid();
+		$registrationUID = self::findTincanUID($attempt->id);
 
 		$parentid = $CFG->wwwroot."/course/view.php?id=" . $event->quizid;
 		$parentObjType = "Activity";
@@ -153,13 +153,13 @@ class report_tincan {
 		//send it
 		
 		//add pass or fail block for quiz
-		$outcomeStatement = self::tincan_write_quiz_outcome($event, $quiz, $attempt);
+		$outcomeStatement = self::tincan_write_quiz_outcome($event, $quiz, $attempt, $registrationUID);
 		if ($outcomeStatement){
 			array_push($statements,$outcomeStatement);
 		}
 
 		// for each question in quiz - submit the block for the question  
-		$questions_array = self::tincan_write_question_submits($event);
+		$questions_array = self::tincan_write_question_submits($event,$registrationUID);
 			
 		foreach ($questions_array as $question_statement){
 			array_push($statements,$question_statement);
@@ -205,12 +205,10 @@ class report_tincan {
 		return true;            
 	}
 
-	public static function tincan_quiz_attempt_submitted_child($event,$questionid,$quiz,$attempt,$questionsattempt){
+	public static function tincan_quiz_attempt_submitted_child($event,$questionid,$quiz,$attempt,$questionsattempt, $registrationUID){
 		global $CFG, $DB, $USER;
 		$course  = $DB->get_record('course', array('id' => $event->courseid));
 		$cm      = get_coursemodule_from_id('quiz', $event->cmid, $event->courseid);
-
-		$registrationUID = self::findTincanUID($attempt->id);
 		
 		$interactionType = "choice";
 		$answers_array = $DB->get_records('question_answers', array('question' => $questionsattempt->questionid));
@@ -319,7 +317,7 @@ class report_tincan {
 				"success" => $success
 			),
 			'context' => array(
-				//"registration" => $registrationUID,
+				"registration" => $registrationUID,
 				"contextActivities" => 
 				array(
 					"grouping" => array(array(
@@ -352,14 +350,13 @@ class report_tincan {
 		return true;
 	}
 
-	public static function tincan_quiz_attempt_passing($event){
+	public static function tincan_quiz_attempt_passing($event,$registrationUID){
 		global $CFG, $DB, $USER;
 		$course  = $DB->get_record('course', array('id' => $event->courseid));
 		$quiz    = $DB->get_record('quiz', array('id' => $event->quizid));
 		$cm      = get_coursemodule_from_id('quiz', $event->cmid, $event->courseid);
 		$attempt = $DB->get_record('quiz_attempts', array('id' => $event->attemptid));
 
-		$registrationUID = self::findTincanUID($attempt->id);
 		$parentid = $CFG->wwwroot."/course/view.php?id=" . $event->quizid;
 		$parentObjType = "Activity";
 
@@ -397,14 +394,13 @@ class report_tincan {
 		return true;
 	}
 
-	public static function tincan_quiz_attempt_failure($event){
+	public static function tincan_quiz_attempt_failure($event,$registrationUID){
 		global $CFG, $DB, $USER;
 		$course  = $DB->get_record('course', array('id' => $event->courseid));
 		$quiz    = $DB->get_record('quiz', array('id' => $event->quizid));
 		$cm      = get_coursemodule_from_id('quiz', $event->cmid, $event->courseid);
 		$attempt = $DB->get_record('quiz_attempts', array('id' => $event->attemptid));
 
-		$registrationUID = self::findTincanUID($attempt->id);
 		$parentid = $CFG->wwwroot."/course/view.php?id=" . $course->id;
 		$parentObjType = "Activity";
 		$statementUID = self::tincanrpt_gen_uuid();
@@ -455,7 +451,7 @@ class report_tincan {
 			return array(
 				"name" => fullname($USER),
 				"account" => array(
-					"homePage" => 'http://example.com',
+					"homePage" => 'https://example.com',
 					"name" => $USER->idnumber
 				),
 				"objectType" => "Agent"
@@ -509,7 +505,7 @@ class report_tincan {
 		);
 	} 
 
-	public static function tincan_write_quiz_outcome($event, $quiz, $attempt){
+	public static function tincan_write_quiz_outcome($event, $quiz, $attempt,$registrationUID){
 		global $CFG, $DB, $USER;
 		// Using the list of qustions from the quiz
 		// get a list of the questions from moodle
@@ -522,10 +518,10 @@ class report_tincan {
 			// get actual and passing grade and compare them    
 			if ($scaled_grade >= $passing_grade){
 				// write the block for the pass
-				return self::tincan_quiz_attempt_passing($event);
+				return self::tincan_quiz_attempt_passing($event,$registrationUID);
 			}else{
 				// write the block for the fail
-				return self::tincan_quiz_attempt_failure($event);
+				return self::tincan_quiz_attempt_failure($event,$registrationUID);
 			}
 		} else{
 			// do nothing
@@ -533,7 +529,7 @@ class report_tincan {
 		}
 	}
 
-	public static function tincan_write_question_submits($event){
+	public static function tincan_write_question_submits($event,$registrationUID){
 		global $CFG, $DB, $USER;
 		// Using the list of qustions from the quiz
 		// get a list of the questions from moodle
@@ -548,7 +544,7 @@ class report_tincan {
 			
 			$question_id = $questionsattempt->questionid;
 			if (($question_id != 0 ) &&($questionsattempt->responsesummary))  {
-				$submittedsection[] = self::tincan_quiz_attempt_submitted_child($event,$question_id,$quiz,$attempt,$questionsattempt);
+				$submittedsection[] = self::tincan_quiz_attempt_submitted_child($event,$question_id,$quiz,$attempt,$questionsattempt,$registrationUID);
 			}
 		}
 		
