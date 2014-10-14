@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="report/tincan/db" VERSION="20101203" COMMENT="XMLDB file for Moodle report/tincan"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="report_tincan" COMMENT="tincan table">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
+    		<FIELD NAME="tincan_timelast_sent" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Statement last resend" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="report_tincan_attempts" COMMENT="Stores tincan reporting associated with a specific tincan quiz report, originated on tincan_quiz_attempt_submitted and referred to by quiz id in all other tincan reporting calls" >
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attemptid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="registration_id" TYPE="char" LENGTH="255" DEFAULT="" SEQUENCE="false"/>
+        <FIELD NAME="transaction_type" TYPE="char" LENGTH="255" DEFAULT="" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="255" DEFAULT="" SEQUENCE="false"/>
+        <FIELD NAME="statustext" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sendattempts" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="firstsendattempt" TYPE="char" LENGTH="255" NOTNULL="true"  SEQUENCE="false"/>
+        <FIELD NAME="lastsendattempt"  TYPE="char" LENGTH="255"  NOTNULL="true"  SEQUENCE="false"/>
+        <FIELD NAME="tincanjson" TYPE="text" NOTNULL="true"  SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="report_tincan_fails" COMMENT="json filed stament" >
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="statement" TYPE="text" LENGTH="10000" NOTNULL="true" SEQUENCE="false"/> 
+        <FIELD NAME="statement_id" TYPE="char" LENGTH="50" NOTNULL="true"  SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="report_tincan_failslog" COMMENT="log file for json stament submission retries" >
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="timestamp" TYPE="char" LENGTH="255" NOTNULL="true"  SEQUENCE="false"/>
+        <FIELD NAME="error" TYPE="char" LENGTH="255" NOTNULL="true"  SEQUENCE="false"/>
+        <FIELD NAME="flagged" TYPE="char" LENGTH="255" NOTNULL="true"  SEQUENCE="false"/>  
+        <FIELD NAME="statement" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/> 
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
